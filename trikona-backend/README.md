@@ -1,1 +1,0 @@
-# trikona-backend-services

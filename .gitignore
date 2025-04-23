@@ -1,0 +1,39 @@
+# Binaries and build outputs
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/bin/
+/build/
+/dist/
+
+# Go module dependencies (if using vendoring)
+vendor/
+
+# Environment files
+.env
+.env.*.local
+.env.*
+
+# Logs and temporary files
+*.log
+tmp/
+
+# IDE and editor files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Coverage files
+coverage.out
+
+# Other potential artifacts
+*.pid
+
+# Binaries
+user-management-service
