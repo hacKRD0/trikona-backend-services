@@ -59,13 +59,35 @@ func main() {
 	router.Use(middleware.RequestLogger())
 
 	// 7. CORS (copy your existing corsConfig from user main)
+	// Configure CORS
 	corsConfig := &middleware.CorsConfig{
-		AllowOrigins:     []string{"*", os.Getenv("FRONTEND_URL"), os.Getenv("BASE_URL")},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-CSRF-Token"},
+		AllowOrigins: []string{
+			"*",                                // Allow all origins
+			"http://localhost:5172",            // Development frontend
+			os.Getenv("FRONTEND_URL"),          // Production frontend
+			os.Getenv("LINKEDIN_REDIRECT_URI"), // LinkedIn callback
+			os.Getenv("BASE_URL"),
+		},
+		AllowMethods: []string{
+			"GET",
+			"POST",
+			"PUT",
+			"DELETE",
+			"OPTIONS",
+			"PATCH",
+		},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"Authorization",
+			"X-CSRF-Token",
+			"Access-Control-Allow-Origin",
+		},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * 60 * 60,
+		MaxAge:           12 * 60 * 60, // 12 hours
 	}
 	router.Use(middleware.Cors(corsConfig))
 
@@ -73,28 +95,40 @@ func main() {
 	api := router.Group("/api/v1")
 	{
 		// --- user-management public ---
-		api.POST("/register",      usrHnd.Register)
-		api.POST("/login",         usrHnd.Login)
-		api.POST("/verify",        usrHnd.RequestVerification)
+		api.POST("/register", usrHnd.Register)
+		api.POST("/login", usrHnd.Login)
+		api.POST("/verify", usrHnd.RequestVerification)
 		api.POST("/forgot-password", usrHnd.RequestPasswordReset)
-		api.GET("/linkedin/auth-url",   usrHnd.GetLinkedInAuthURL)
-		api.POST("/linkedin/callback",  usrHnd.GetLinkedInProfileInfo)
+		api.GET("/linkedin/auth-url", usrHnd.GetLinkedInAuthURL)
+		api.POST("/linkedin/callback", usrHnd.GetLinkedInProfileInfo)
 
 		// --- protected user routes ---
 		apiAuth := api.Group("")
 		apiAuth.Use(user_api.AuthMiddleware(jwtSvc))
 		{
-			apiAuth.PUT("/users",         usrHnd.UpdateUser)
-			apiAuth.DELETE("/users",      usrHnd.DeleteUser)
+			apiAuth.PUT("/users", usrHnd.UpdateUser)
+			apiAuth.DELETE("/users", usrHnd.DeleteUser)
 			apiAuth.POST("/reset-password", usrHnd.ResetPassword)
 			// --- directory-service student routes ---
-			// e.g. GET /api/v1/students?...
 			apiStu := apiAuth.Group("/directory")
 			{
 				apiStu.GET("/students", stuHnd.GetStudents)
+				apiStu.GET("/students/:id", stuHnd.GetStudent)
+				apiStu.POST("/students", stuHnd.CreateStudent)
+				apiStu.PUT("/students/:id", stuHnd.UpdateStudent)
+				apiStu.DELETE("/students/:id", stuHnd.DeleteStudent)
 			}
-		}
 
+			// --- directory-service college routes ---
+			// apiCol := apiAuth.Group("/directory/colleges")
+			// {
+			// 	apiCol.GET("/", colHnd.GetColleges)
+			// 	apiCol.GET("/:id", colHnd.GetCollege)
+			// 	apiCol.POST("/", colHnd.CreateCollege)
+			// 	apiCol.PUT("/:id", colHnd.UpdateCollege)
+			// 	apiCol.DELETE("/:id", colHnd.DeleteCollege)
+			// }
+		}
 	}
 
 	// 9. Start

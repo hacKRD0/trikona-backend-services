@@ -8,7 +8,7 @@ import (
 
 // LoadEnv loads environment variables from .env file
 func LoadEnv() error {
-	return godotenv.Load(".env.prod")
+	return godotenv.Load(".env")
 }
 
 // GetEnv returns the value of the environment variable or the default value if not set

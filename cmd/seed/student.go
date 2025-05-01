@@ -162,12 +162,13 @@ func createExperiences(db *gorm.DB, userID uint, companies, titles []string, opt
 func createEducations(db *gorm.DB, userID uint, colleges []string, opts []int, collegeMap map[string]*sd.CollegeMaster) []sd.Education {
 	eds := []sd.Education{}
 	degrees := []string{"Bachelors", "Masters", "High School", "Diploma"}
+	fieldsOfStudy := []string{"Civil Engineering", "Structural Engineering", "Geotechnical Engineering", "Traffic Engineering"}
 	count := rand.Intn(3) + 1
 	for i := 0; i < count; i++ {
 		start := time.Now().AddDate(-rand.Intn(5)-1, 0, 0)
 		years := opts[rand.Intn(len(opts))] / 12
 		end := start.AddDate(years, 0, 0)
-		eds = append(eds, sd.Education{UserID: userID, CollegeID: collegeMap[colleges[rand.Intn(len(colleges))]].ID, Degree: degrees[rand.Intn(len(colleges))], FieldOfStudy: colleges[rand.Intn(len(colleges))], StartDate: start, EndDate: end, YearOfStudy: rand.Intn(4)+1, CGPA: float32(rand.Intn(1001))/100, DurationMonths: years*12, IsLatest:false})
+		eds = append(eds, sd.Education{UserID: userID, CollegeID: collegeMap[colleges[rand.Intn(len(colleges))]].ID, Degree: degrees[rand.Intn(len(colleges))], FieldOfStudy: fieldsOfStudy[rand.Intn(len(fieldsOfStudy))], StartDate: start, EndDate: end, YearOfStudy: rand.Intn(4)+1, CGPA: float32(rand.Intn(1001))/100, DurationMonths: years*12, IsLatest:false})
 	}
 	// mark latest
 	latestIdx := 0

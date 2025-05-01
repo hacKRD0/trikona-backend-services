@@ -6,8 +6,9 @@ type StudentFilterParams struct {
     // latest-education filters
     CollegeName       *string  `form:"collegeName"`   // latest Education.College
     Level             *string  `form:"level"`         // latest Education.Degree
-    MinCgpa           *float32 `form:"minCgpa"`       // latest Education.CGPA
+    CgpaRanges        string  `form:"cgpaRanges"` // comma-separated CGPA ranges (e.g., "6.0-7.0,7.0-8.0")
     YearOfStudy       *int     `form:"yearOfStudy"`   // latest Education.YearOfStudy
+    FieldOfStudy      *string  `form:"fieldOfStudy"`  // latest Education.FieldOfStudy
 
     // latest-experience filters
     Company           *string  `form:"company"`       // latest Experience.Company

@@ -3,6 +3,7 @@ package student
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -49,4 +50,82 @@ func (h *StudentHandler) GetStudents(c *gin.Context) {
         "pageSize":   params.PageSize,
         "totalItems": total,
     })
+}
+
+// GetStudent retrieves a student by ID
+func (h *StudentHandler) GetStudent(c *gin.Context) {
+    id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid student ID"})
+        return
+    }
+
+    student, err := h.uc.GetStudentByID(uint(id))
+    if err != nil {
+        logger.Error("failed to get student", err)
+        c.JSON(http.StatusNotFound, gin.H{"error": "student not found"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": student})
+}
+
+// CreateStudent adds a new student
+func (h *StudentHandler) CreateStudent(c *gin.Context) {
+    var student domain.Student
+    if err := c.ShouldBindJSON(&student); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    if err := h.uc.CreateStudent(&student); err != nil {
+        logger.Error("failed to create student", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create student"})
+        return
+    }
+
+    c.JSON(http.StatusCreated, gin.H{"data": student})
+}
+
+// UpdateStudent modifies an existing student
+func (h *StudentHandler) UpdateStudent(c *gin.Context) {
+    id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid student ID"})
+        return
+    }
+
+    var student domain.Student
+    if err := c.ShouldBindJSON(&student); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Ensure the ID in the URL matches the student object
+    student.ID = uint(id)
+
+    if err := h.uc.UpdateStudent(&student); err != nil {
+        logger.Error("failed to update student", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update student"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"data": student})
+}
+
+// DeleteStudent removes a student
+func (h *StudentHandler) DeleteStudent(c *gin.Context) {
+    id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid student ID"})
+        return
+    }
+
+    if err := h.uc.DeleteStudent(uint(id)); err != nil {
+        logger.Error("failed to delete student", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete student"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "student deleted successfully"})
 }

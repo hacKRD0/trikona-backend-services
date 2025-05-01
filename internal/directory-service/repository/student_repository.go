@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strconv"
+	"strings"
 	"github.com/hacKRD0/trikona_go/internal/directory-service/domain"
 	"gorm.io/gorm"
 )
@@ -8,6 +10,10 @@ import (
 type StudentRepository interface {
 	Count(params *domain.StudentFilterParams) (int64, error)
 	Find(params *domain.StudentFilterParams, offset, limit int) ([]domain.Student, error)
+	GetByID(id uint) (*domain.Student, error)
+	Create(student *domain.Student) error
+	Update(student *domain.Student) error
+	Delete(id uint) error
 }
 
 type studentRepository struct {
@@ -69,10 +75,35 @@ func (r *studentRepository) Find(params *domain.StudentFilterParams, offset, lim
 	return students, nil
 }
 
+// GetByID retrieves a student by ID
+func (r *studentRepository) GetByID(id uint) (*domain.Student, error) {
+	var student domain.Student
+	result := r.db.Preload("User").Preload("Skills").Preload("Educations").Preload("Experiences").First(&student, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &student, nil
+}
+
+// Create adds a new student to the database
+func (r *studentRepository) Create(student *domain.Student) error {
+	return r.db.Create(student).Error
+}
+
+// Update modifies an existing student
+func (r *studentRepository) Update(student *domain.Student) error {
+	return r.db.Save(student).Error
+}
+
+// Delete removes a student by ID
+func (r *studentRepository) Delete(id uint) error {
+	return r.db.Delete(&domain.Student{}, id).Error
+}
+
 func applyStudentFilters(db *gorm.DB, params *domain.StudentFilterParams) *gorm.DB {
 	// 1) Latest-education filters
 	if params.CollegeName != nil || params.Level != nil ||
-		params.MinCgpa != nil || params.YearOfStudy != nil {
+		params.CgpaRanges != "" || params.YearOfStudy != nil || params.FieldOfStudy != nil {
 
 		db = db.Joins(`
 			JOIN educations AS latest_edu
@@ -82,18 +113,51 @@ func applyStudentFilters(db *gorm.DB, params *domain.StudentFilterParams) *gorm.
 
 		if params.CollegeName != nil && *params.CollegeName != "" {
 			db = db.Joins(`
-				JOIN college_master AS cm
+				JOIN college_masters AS cm
 				  ON cm.id = latest_edu.college_id
 			`).Where("cm.name ILIKE ?", "%"+*params.CollegeName+"%")
 		}
 		if params.Level != nil && *params.Level != "" {
 			db = db.Where("latest_edu.degree = ?", *params.Level)
 		}
-		if params.MinCgpa != nil {
-			db = db.Where("latest_edu.cgpa >= ?", *params.MinCgpa)
+		if params.CgpaRanges != "" {
+            // Split the ranges string by comma
+            ranges := strings.Split(params.CgpaRanges, ",")
+            
+            // Build CGPA range conditions
+            var cgpaConditions []string
+            var cgpaValues []interface{}
+            
+            for _, r := range ranges {
+                // Split each range by hyphen
+                parts := strings.Split(strings.TrimSpace(r), "-")
+                if len(parts) != 2 {
+                    continue // Skip invalid ranges
+                }
+                
+                // Parse min and max values
+                min, err1 := strconv.ParseFloat(parts[0], 32)
+                max, err2 := strconv.ParseFloat(parts[1], 32)
+                if err1 != nil || err2 != nil {
+                    continue // Skip invalid numbers
+                }
+                
+                condition := "(latest_edu.cgpa >= ? AND latest_edu.cgpa <= ?)"
+                cgpaConditions = append(cgpaConditions, condition)
+                cgpaValues = append(cgpaValues, float32(min), float32(max))
+            }
+            
+            if len(cgpaConditions) > 0 {
+                // Combine conditions with OR
+                db = db.Where(strings.Join(cgpaConditions, " OR "), cgpaValues...)
+            }
 		}
 		if params.YearOfStudy != nil {
 			db = db.Where("latest_edu.year_of_study = ?", *params.YearOfStudy)
+		}
+		if params.FieldOfStudy != nil && *params.FieldOfStudy != "" {
+			fieldsOfStudy := strings.Split(*params.FieldOfStudy, ",")
+			db = db.Where("latest_edu.field_of_study IN ?", fieldsOfStudy)
 		}
 	}
 
@@ -109,7 +173,7 @@ func applyStudentFilters(db *gorm.DB, params *domain.StudentFilterParams) *gorm.
 
 		if params.Company != nil && *params.Company != "" {
 			db = db.Joins(`
-				JOIN company_master AS com
+				JOIN company_masters AS com
 				  ON com.id = latest_exp.company_id
 			`).Where("com.name ILIKE ?", "%"+*params.Company+"%")
 		}

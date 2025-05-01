@@ -9,6 +9,10 @@ import (
 
 type StudentUsecase interface {
     FetchStudents(params *domain.StudentFilterParams) ([]domain.Student, int64, error)
+    GetStudentByID(id uint) (*domain.Student, error)
+    CreateStudent(student *domain.Student) error
+    UpdateStudent(student *domain.Student) error
+    DeleteStudent(id uint) error
 }
 
 type studentUsecase struct {
@@ -33,4 +37,24 @@ func (u *studentUsecase) FetchStudents(params *domain.StudentFilterParams) ([]do
     }
 
     return students, total, nil
+}
+
+// GetStudentByID retrieves a student by ID
+func (u *studentUsecase) GetStudentByID(id uint) (*domain.Student, error) {
+    return u.repo.GetByID(id)
+}
+
+// CreateStudent adds a new student
+func (u *studentUsecase) CreateStudent(student *domain.Student) error {
+    return u.repo.Create(student)
+}
+
+// UpdateStudent modifies an existing student
+func (u *studentUsecase) UpdateStudent(student *domain.Student) error {
+    return u.repo.Update(student)
+}
+
+// DeleteStudent removes a student by ID
+func (u *studentUsecase) DeleteStudent(id uint) error {
+    return u.repo.Delete(id)
 }
