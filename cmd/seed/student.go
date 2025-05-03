@@ -16,7 +16,7 @@ import (
 	um "github.com/hacKRD0/trikona_go/internal/user-management-service/domain"
 )
 
-func main() {
+func notmain() {
 	// Load environment and initialize DB
 	if err := config.LoadEnv(); err != nil {
 		panic("failed to load .env: " + err.Error())
@@ -151,11 +151,16 @@ func createExperiences(db *gorm.DB, userID uint, companies, titles []string, opt
 	latestIdx := 0
 	latestTime := exs[0].StartDate
 	for i, e := range exs {
-		if e.StartDate.After(latestTime) { latestTime = e.StartDate; latestIdx = i }
+		if e.StartDate.After(latestTime) {
+			latestTime = e.StartDate
+			latestIdx = i
+		}
 	}
 	exs[latestIdx].IsLatest = true
 	// persist
-	for _, e := range exs { db.Create(&e) }
+	for _, e := range exs {
+		db.Create(&e)
+	}
 	return exs
 }
 
@@ -168,22 +173,29 @@ func createEducations(db *gorm.DB, userID uint, colleges []string, opts []int, c
 		start := time.Now().AddDate(-rand.Intn(5)-1, 0, 0)
 		years := opts[rand.Intn(len(opts))] / 12
 		end := start.AddDate(years, 0, 0)
-		eds = append(eds, sd.Education{UserID: userID, CollegeID: collegeMap[colleges[rand.Intn(len(colleges))]].ID, Degree: degrees[rand.Intn(len(colleges))], FieldOfStudy: fieldsOfStudy[rand.Intn(len(fieldsOfStudy))], StartDate: start, EndDate: end, YearOfStudy: rand.Intn(4)+1, CGPA: float32(rand.Intn(1001))/100, DurationMonths: years*12, IsLatest:false})
+		eds = append(eds, sd.Education{UserID: userID, CollegeID: collegeMap[colleges[rand.Intn(len(colleges))]].ID, Degree: degrees[rand.Intn(len(colleges))], FieldOfStudy: fieldsOfStudy[rand.Intn(len(fieldsOfStudy))], StartDate: start, EndDate: end, YearOfStudy: rand.Intn(4) + 1, CGPA: float32(rand.Intn(1001)) / 100, DurationMonths: years * 12, IsLatest: false})
 	}
 	// mark latest
 	latestIdx := 0
 	latestTime := eds[0].StartDate
 	for i, ed := range eds {
-		if ed.StartDate.After(latestTime) { latestTime = ed.StartDate; latestIdx = i }
+		if ed.StartDate.After(latestTime) {
+			latestTime = ed.StartDate
+			latestIdx = i
+		}
 	}
 	eds[latestIdx].IsLatest = true
 	// persist
-	for _, ed := range eds { db.Create(&ed) }
+	for _, ed := range eds {
+		db.Create(&ed)
+	}
 	return eds
 }
 
 func sumExperienceYears(exs []sd.Experience) int {
 	total := 0
-	for _, e := range exs { total += e.DurationMonths / 12 }
+	for _, e := range exs {
+		total += e.DurationMonths / 12
+	}
 	return total
 }

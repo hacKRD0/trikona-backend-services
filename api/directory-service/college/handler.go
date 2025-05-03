@@ -1,4 +1,4 @@
-package college
+package directory
 
 import (
 	"net/http"

@@ -11,7 +11,8 @@ import (
 	user_uc "github.com/hacKRD0/trikona_go/internal/user-management-service/usecase"
 
 	// directory-service imports
-	dir_api "github.com/hacKRD0/trikona_go/api/directory-service/student"
+	corporate_api "github.com/hacKRD0/trikona_go/api/directory-service/corporate"
+	student_api "github.com/hacKRD0/trikona_go/api/directory-service/student"
 	dir_repo "github.com/hacKRD0/trikona_go/internal/directory-service/repository"
 	dir_uc "github.com/hacKRD0/trikona_go/internal/directory-service/usecase"
 
@@ -52,7 +53,11 @@ func main() {
 	// 5. Wire up directory-service
 	stuRepo := dir_repo.NewStudentRepository(db)
 	stuUse := dir_uc.NewStudentUsecase(stuRepo)
-	stuHnd := dir_api.NewStudentHandler(stuUse) // adjust if your constructor differs
+	stuHnd := student_api.NewStudentHandler(stuUse)
+
+	corRepo := dir_repo.NewCorporateRepository(db)
+	corUse := dir_uc.NewCorporateUsecase(corRepo)
+	corHnd := corporate_api.NewCorporateHandler(corUse)
 
 	// 6. Setup Gin router
 	router := gin.Default()
@@ -119,16 +124,13 @@ func main() {
 				apiStu.DELETE("/students/:id", stuHnd.DeleteStudent)
 			}
 
-			// --- directory-service college routes ---
-			// apiCol := apiAuth.Group("/directory/colleges")
+			// --- directory-service corporate routes ---
+			// apiCor := apiAuth.Group("/directory")
 			// {
-			// 	apiCol.GET("/", colHnd.GetColleges)
-			// 	apiCol.GET("/:id", colHnd.GetCollege)
-			// 	apiCol.POST("/", colHnd.CreateCollege)
-			// 	apiCol.PUT("/:id", colHnd.UpdateCollege)
-			// 	apiCol.DELETE("/:id", colHnd.DeleteCollege)
+			// 	apiCor.GET("/corporates", corHnd.GetCorporates)
 			// }
 		}
+		api.GET("/directory/corporates", corHnd.GetCorporates)
 	}
 
 	// 9. Start

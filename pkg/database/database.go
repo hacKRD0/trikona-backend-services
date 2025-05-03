@@ -8,6 +8,7 @@ import (
 	"github.com/hacKRD0/trikona_go/internal/user-management-service/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // InitDB initializes the database connection
@@ -28,7 +29,11 @@ func InitDB() (*gorm.DB, error) {
 	)
 
 	// Open the database connection
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// Open the database connection with logging enabled
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
@@ -51,4 +56,4 @@ func InitDB() (*gorm.DB, error) {
 
 	log.Println("Successfully connected to database")
 	return db, nil
-} 
+}
