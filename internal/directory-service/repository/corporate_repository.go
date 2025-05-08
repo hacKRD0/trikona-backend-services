@@ -2,6 +2,8 @@ package repository
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/hacKRD0/trikona_go/internal/directory-service/domain"
 	"github.com/hacKRD0/trikona_go/pkg/utils"
@@ -52,8 +54,41 @@ func (r *corporateRepository) Find(params *domain.CorporateFilterParams, offset,
 
 // applyCorporateFilters applies filters to the query using lowercase name comparison
 func applyCorporateFilters(db *gorm.DB, params *domain.CorporateFilterParams) *gorm.DB {
-	if params.MinSize != nil {
-		db = db.Where("headCount >= ?", *params.MinSize)
+	// Filter by headCountRanges
+	// fmt.Println("params", params)
+	if len(params.HeadCountRanges) > 0 {
+		var conditions []string
+		var args []interface{}
+		ranges := strings.Split(params.HeadCountRanges[0], ",")
+		// fmt.Println("ranges", ranges)
+		for _, r := range ranges {
+			// fmt.Println("r", r)
+			r = strings.TrimSpace(r)
+			if r == "500+" {
+				conditions = append(conditions, "head_count > ?")
+				args = append(args, 500)
+				continue
+			}
+
+			parts := strings.Split(r, "-")
+			// fmt.Println("parts", parts)
+			if len(parts) != 2 {
+				fmt.Println("len(parts) != 2")
+				continue // Skip invalid ranges
+			}
+			min, err1 := strconv.ParseFloat(parts[0], 32)
+			max, err2 := strconv.ParseFloat(parts[1], 32)
+			if err1 != nil || err2 != nil {
+				fmt.Println("err1", err1)
+				continue // Skip invalid numbers
+			}
+			conditions = append(conditions, "head_count BETWEEN ? AND ?")
+			args = append(args, min, max)
+		}
+		if len(conditions) > 0 {
+			whereClause := strings.Join(conditions, " OR ")
+			db = db.Where(whereClause, args...)
+		}
 	}
 
 	// Filter by country names (case-insensitive)
@@ -102,8 +137,8 @@ func applyCorporateFilters(db *gorm.DB, params *domain.CorporateFilterParams) *g
 	if params.SearchTerm != nil && *params.SearchTerm != "" {
 		t := "%" + *params.SearchTerm + "%"
 		db = db.Where(
-			"CompanyName ILIKE ? OR headquarters ILIKE ?",
-			t, t,
+			"company_name ILIKE ?",
+			t,
 		)
 	}
 

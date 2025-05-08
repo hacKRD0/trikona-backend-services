@@ -11,6 +11,7 @@ import (
 	user_uc "github.com/hacKRD0/trikona_go/internal/user-management-service/usecase"
 
 	// directory-service imports
+	master_api "github.com/hacKRD0/trikona_go/api/directory-service"
 	corporate_api "github.com/hacKRD0/trikona_go/api/directory-service/corporate"
 	student_api "github.com/hacKRD0/trikona_go/api/directory-service/student"
 	dir_repo "github.com/hacKRD0/trikona_go/internal/directory-service/repository"
@@ -58,6 +59,10 @@ func main() {
 	corRepo := dir_repo.NewCorporateRepository(db)
 	corUse := dir_uc.NewCorporateUsecase(corRepo)
 	corHnd := corporate_api.NewCorporateHandler(corUse)
+
+	masterRepo := dir_repo.NewMasterRepository(db)
+	masterUse := dir_uc.NewMasterUsecase(masterRepo)
+	masterHnd := master_api.NewMasterHandler(masterUse)
 
 	// 6. Setup Gin router
 	router := gin.Default()
@@ -131,6 +136,14 @@ func main() {
 			// }
 		}
 		api.GET("/directory/corporates", corHnd.GetCorporates)
+		api.GET("/directory/masters/industries", masterHnd.GetAllIndustries)
+		api.GET("/directory/masters/companies", masterHnd.GetAllCompanies)
+		api.GET("/directory/masters/sectors", masterHnd.GetAllSectors)
+		api.GET("/directory/masters/services", masterHnd.GetAllServices)
+		api.GET("/directory/masters/states", masterHnd.GetAllStates)
+		api.GET("/directory/masters/skills", masterHnd.GetAllSkills)
+		api.GET("/directory/masters/countries", masterHnd.GetAllCountries)
+		api.GET("/directory/masters/colleges", masterHnd.GetAllColleges)
 	}
 
 	// 9. Start

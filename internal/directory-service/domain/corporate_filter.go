@@ -3,7 +3,7 @@ package domain
 // CorporateFilterParams holds query params for /corporates
 type CorporateFilterParams struct {
 	// general search across user names
-	SearchTerm *string `form:"search"`
+	SearchTerm *string `form:"searchTerm"`
 
 	// country and state filters
 	Country []string `form:"country"`
@@ -14,7 +14,8 @@ type CorporateFilterParams struct {
 	Industries []string `form:"industries"`
 	Services   []string `form:"services"`
 
-	MinSize *int `form:"minSize"`
+	// headCountRanges filter
+	HeadCountRanges []string `form:"headCountRanges"`
 
 	// pagination
 	Page     int `form:"page,default=1"`
