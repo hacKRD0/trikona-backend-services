@@ -12,7 +12,9 @@ import (
 
 	// directory-service imports
 	master_api "github.com/hacKRD0/trikona_go/api/directory-service"
+	college_api "github.com/hacKRD0/trikona_go/api/directory-service/college"
 	corporate_api "github.com/hacKRD0/trikona_go/api/directory-service/corporate"
+	professional_api "github.com/hacKRD0/trikona_go/api/directory-service/professional"
 	student_api "github.com/hacKRD0/trikona_go/api/directory-service/student"
 	dir_repo "github.com/hacKRD0/trikona_go/internal/directory-service/repository"
 	dir_uc "github.com/hacKRD0/trikona_go/internal/directory-service/usecase"
@@ -56,9 +58,17 @@ func main() {
 	stuUse := dir_uc.NewStudentUsecase(stuRepo)
 	stuHnd := student_api.NewStudentHandler(stuUse)
 
+	proRepo := dir_repo.NewProfessionalRepository(db)
+	proUse := dir_uc.NewProfessionalUsecase(proRepo)
+	proHnd := professional_api.NewProfessionalHandler(proUse)
+
 	corRepo := dir_repo.NewCorporateRepository(db)
 	corUse := dir_uc.NewCorporateUsecase(corRepo)
 	corHnd := corporate_api.NewCorporateHandler(corUse)
+
+	colRepo := dir_repo.NewCollegeRepository(db)
+	colUse := dir_uc.NewCollegeUsecase(colRepo)
+	colHnd := college_api.NewCollegeHandler(colUse)
 
 	masterRepo := dir_repo.NewMasterRepository(db)
 	masterUse := dir_uc.NewMasterUsecase(masterRepo)
@@ -136,6 +146,8 @@ func main() {
 			// }
 		}
 		api.GET("/directory/corporates", corHnd.GetCorporates)
+		api.GET("/directory/colleges", colHnd.GetColleges)
+		api.GET("/directory/professionals", proHnd.GetProfessionals)
 		api.GET("/directory/masters/industries", masterHnd.GetAllIndustries)
 		api.GET("/directory/masters/companies", masterHnd.GetAllCompanies)
 		api.GET("/directory/masters/sectors", masterHnd.GetAllSectors)

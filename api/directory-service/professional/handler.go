@@ -6,13 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hacKRD0/trikona_go/internal/directory-service/domain"
 	"github.com/hacKRD0/trikona_go/internal/directory-service/usecase"
+	"github.com/hacKRD0/trikona_go/pkg/utils"
 )
 
 type Handler struct {
 	uc usecase.ProfessionalUsecase
 }
 
-func NewHandler(uc usecase.ProfessionalUsecase) *Handler {
+func NewProfessionalHandler(uc usecase.ProfessionalUsecase) *Handler {
 	return &Handler{uc: uc}
 }
 
@@ -22,6 +23,8 @@ func (h *Handler) GetProfessionals(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
 		return
 	}
+
+	params.Skills = utils.SplitStringArray(params.Skills)
 	list, total, err := h.uc.FetchProfessionals(&params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch professionals"})

@@ -1,16 +1,19 @@
 package domain
 
 import (
-	"github.com/lib/pq"
+	um "github.com/hacKRD0/trikona_go/internal/user-management-service/domain"
 	"gorm.io/gorm"
 )
 
 // Professional represents a professional directory entry
 type Professional struct {
-    gorm.Model
-    UserID        uint           `gorm:"not null;uniqueIndex" json:"userId"`
-    CurrentTitle  string         `gorm:"size:100" json:"currentTitle"`
-    ExperienceYrs int            `gorm:"not null" json:"experienceYrs"`
-    Skills        pq.StringArray `gorm:"type:text[]" json:"skills"`
-    Industries    pq.StringArray `gorm:"type:text[]" json:"industries"`
+	gorm.Model
+	// Link back to the User in user-management service
+	UserID uint    `gorm:"not null;uniqueIndex;constraint:OnDelete:CASCADE" json:"userId"`
+	User   um.User `gorm:"foreignKey:UserID;references:ID" json:"user"`
+
+	Educations           []Education   `gorm:"foreignKey:UserID" json:"educations"`
+	Experiences          []Experience  `gorm:"foreignKey:UserID" json:"experiences"`
+	TotalExperienceYears int           `gorm:"not null;default:0" json:"totalExperienceYears"`
+	Skills               []SkillMaster `gorm:"many2many:student_skill;constraint:OnDelete:CASCADE" json:"skills"`
 }

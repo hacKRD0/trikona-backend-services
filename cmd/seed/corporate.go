@@ -17,7 +17,7 @@ import (
 	um "github.com/hacKRD0/trikona_go/internal/user-management-service/domain"
 )
 
-func main() {
+func not2main() {
 	// Load environment and initialize DB
 	if err := config.LoadEnv(); err != nil {
 		panic("failed to load .env: " + err.Error())
@@ -447,54 +447,3 @@ func seedCorporates(db *gorm.DB, pwd string, industries []sd.IndustryMaster, ser
 		fmt.Printf("Created corporate user with ID: %d\n", corporateUser.ID)
 	}
 }
-
-// func seedCorporateUsers(db *gorm.DB, pwd string, industries []sd.IndustryMaster, services []sd.ServiceMaster, sectors []sd.SectorMaster, countries []sd.CountryMaster, states []sd.StateMaster) {
-// 	// Create corporate users
-// 	corporateUsers := []sd.CorporateUser{
-// 		{
-// 			CorporateID: 1,
-// 			User: um.User{
-// 				FirstName: "John",
-// 				LastName:  "Doe",
-// 				Email:     "john.doe@company1.com",
-// 				Role:      um.RoleCorporateAdmin,
-// 				Status:    um.UserStatusActive,
-// 			},
-// 		},
-// 		{
-// 			CorporateID: 1,
-// 			User: um.User{
-// 				FirstName: "Jane",
-// 				LastName:  "Smith",
-// 				Email:     "jane.smith@company1.com",
-// 				Role:      um.RoleCorporateModerator,
-// 				Status:    um.UserStatusActive,
-// 			},
-// 		},
-// 		{
-// 			CorporateID: 2,
-// 			User: um.User{
-// 				FirstName: "Mike",
-// 				LastName:  "Johnson",
-// 				Email:     "mike.johnson@company2.com",
-// 				Role:      um.RoleCorporateAdmin,
-// 				Status:    um.UserStatusActive,
-// 			},
-// 		},
-// 	}
-
-// 	// Create users first
-// 	for _, user := range corporateUsers {
-// 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
-// 		user.User.Password = string(hashedPassword)
-// 		db.Create(&user.User)
-// 	}
-
-// 	// Now create corporate users with foreign key references
-// 	for i, user := range corporateUsers {
-// 		var dbUser um.User
-// 		db.First(&dbUser, "email = ?", user.User.Email)
-// 		corporateUsers[i].UserID = dbUser.ID
-// 		db.Create(&corporateUsers[i])
-// 	}
-// }

@@ -8,53 +8,49 @@ import (
 )
 
 type StudentUsecase interface {
-    FetchStudents(params *domain.StudentFilterParams) ([]domain.Student, int64, error)
-    GetStudentByID(id uint) (*domain.Student, error)
-    CreateStudent(student *domain.Student) error
-    UpdateStudent(student *domain.Student) error
-    DeleteStudent(id uint) error
+	FetchStudents(params *domain.StudentFilterParams) ([]domain.Student, int64, error)
+	GetStudentByID(id uint) (*domain.Student, error)
+	CreateStudent(student *domain.Student) error
+	UpdateStudent(student *domain.Student) error
+	DeleteStudent(id uint) error
 }
 
 type studentUsecase struct {
-    repo repository.StudentRepository
+	repo repository.StudentRepository
 }
 
 func NewStudentUsecase(repo repository.StudentRepository) StudentUsecase {
-    return &studentUsecase{repo: repo}
+	return &studentUsecase{repo: repo}
 }
 
 func (u *studentUsecase) FetchStudents(params *domain.StudentFilterParams) ([]domain.Student, int64, error) {
-    offset, limit := pagination.CalculateOffsetLimit(params.Page, params.PageSize)
+	offset, limit := pagination.CalculateOffsetLimit(params.Page, params.PageSize)
 
-    total, err := u.repo.Count(params)
-    if err != nil {
-        return nil, 0, err
-    }
+	total, err := u.repo.Count(params)
+	if err != nil {
+		return nil, 0, err
+	}
 
-    students, err := u.repo.Find(params, offset, limit)
-    if err != nil {
-        return nil, 0, err
-    }
-
-    return students, total, nil
+	students, err := u.repo.Find(params, offset, limit)
+	return students, total, err
 }
 
 // GetStudentByID retrieves a student by ID
 func (u *studentUsecase) GetStudentByID(id uint) (*domain.Student, error) {
-    return u.repo.GetByID(id)
+	return u.repo.GetByID(id)
 }
 
 // CreateStudent adds a new student
 func (u *studentUsecase) CreateStudent(student *domain.Student) error {
-    return u.repo.Create(student)
+	return u.repo.Create(student)
 }
 
 // UpdateStudent modifies an existing student
 func (u *studentUsecase) UpdateStudent(student *domain.Student) error {
-    return u.repo.Update(student)
+	return u.repo.Update(student)
 }
 
 // DeleteStudent removes a student by ID
 func (u *studentUsecase) DeleteStudent(id uint) error {
-    return u.repo.Delete(id)
+	return u.repo.Delete(id)
 }

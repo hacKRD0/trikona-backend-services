@@ -3,6 +3,7 @@ package repository
 import (
 	"strconv"
 	"strings"
+
 	"github.com/hacKRD0/trikona_go/internal/directory-service/domain"
 	"gorm.io/gorm"
 )
@@ -47,19 +48,18 @@ func (r *studentRepository) Find(params *domain.StudentFilterParams, offset, lim
 
 	q := r.db.
 		Preload("User").
-		Preload("User").
- 
-        // preload latest education and its College
-        Preload("Educations", func(db *gorm.DB) *gorm.DB {
-            return db.Where("is_latest = ?", true)
-        }).
-        Preload("Educations.College").
- 
-        // preload latest experience and its Company
-        Preload("Experiences", func(db *gorm.DB) *gorm.DB {
-            return db.Where("is_latest = ?", true)
-        }).
-        Preload("Experiences.Company").
+
+		// preload latest education and its College
+		Preload("Educations", func(db *gorm.DB) *gorm.DB {
+			return db.Where("is_latest = ?", true)
+		}).
+		Preload("Educations.College").
+
+		// preload latest experience and its Company
+		Preload("Experiences", func(db *gorm.DB) *gorm.DB {
+			return db.Where("is_latest = ?", true)
+		}).
+		Preload("Experiences.Company").
 		Preload("Skills").
 		Model(&domain.Student{})
 
@@ -121,36 +121,36 @@ func applyStudentFilters(db *gorm.DB, params *domain.StudentFilterParams) *gorm.
 			db = db.Where("latest_edu.degree = ?", *params.Level)
 		}
 		if params.CgpaRanges != "" {
-            // Split the ranges string by comma
-            ranges := strings.Split(params.CgpaRanges, ",")
-            
-            // Build CGPA range conditions
-            var cgpaConditions []string
-            var cgpaValues []interface{}
-            
-            for _, r := range ranges {
-                // Split each range by hyphen
-                parts := strings.Split(strings.TrimSpace(r), "-")
-                if len(parts) != 2 {
-                    continue // Skip invalid ranges
-                }
-                
-                // Parse min and max values
-                min, err1 := strconv.ParseFloat(parts[0], 32)
-                max, err2 := strconv.ParseFloat(parts[1], 32)
-                if err1 != nil || err2 != nil {
-                    continue // Skip invalid numbers
-                }
-                
-                condition := "(latest_edu.cgpa >= ? AND latest_edu.cgpa <= ?)"
-                cgpaConditions = append(cgpaConditions, condition)
-                cgpaValues = append(cgpaValues, float32(min), float32(max))
-            }
-            
-            if len(cgpaConditions) > 0 {
-                // Combine conditions with OR
-                db = db.Where(strings.Join(cgpaConditions, " OR "), cgpaValues...)
-            }
+			// Split the ranges string by comma
+			ranges := strings.Split(params.CgpaRanges, ",")
+
+			// Build CGPA range conditions
+			var cgpaConditions []string
+			var cgpaValues []interface{}
+
+			for _, r := range ranges {
+				// Split each range by hyphen
+				parts := strings.Split(strings.TrimSpace(r), "-")
+				if len(parts) != 2 {
+					continue // Skip invalid ranges
+				}
+
+				// Parse min and max values
+				min, err1 := strconv.ParseFloat(parts[0], 32)
+				max, err2 := strconv.ParseFloat(parts[1], 32)
+				if err1 != nil || err2 != nil {
+					continue // Skip invalid numbers
+				}
+
+				condition := "(latest_edu.cgpa >= ? AND latest_edu.cgpa <= ?)"
+				cgpaConditions = append(cgpaConditions, condition)
+				cgpaValues = append(cgpaValues, float32(min), float32(max))
+			}
+
+			if len(cgpaConditions) > 0 {
+				// Combine conditions with OR
+				db = db.Where(strings.Join(cgpaConditions, " OR "), cgpaValues...)
+			}
 		}
 		if params.YearOfStudy != nil {
 			db = db.Where("latest_edu.year_of_study = ?", *params.YearOfStudy)

@@ -1,9 +1,10 @@
-# User Management Service
+# Trikona Backend Services
 
-A microservice for handling user authentication, registration, and profile management. Built with Go and following clean architecture principles.
+A comprehensive backend system built with Go, following clean architecture principles. The system consists of multiple microservices for user management, directory services, and more.
 
 ## Features
 
+### User Management Service
 - User registration and authentication
 - Email verification
 - Password reset functionality
@@ -12,6 +13,34 @@ A microservice for handling user authentication, registration, and profile manag
 - JWT-based authentication
 - LinkedIn OAuth integration
 
+### Directory Service
+#### Student Management
+- CRUD operations for student profiles
+- Advanced filtering and pagination
+- Skills management
+- Education history tracking
+
+#### Professional Directory
+- Professional profile management
+- Advanced search with multiple filters
+- Skills and experience tracking
+- Paginated results
+
+#### Corporate Management
+- Corporate profile management
+- Office locations
+- Industry classification
+
+#### College Management
+- College profile management
+- Branch and department tracking
+- Student enrollment
+
+#### Master Data Management
+- Countries and states
+- Industries and sectors
+- Skills and services catalogs
+
 ## Prerequisites
 
 - Go 1.21 or higher
@@ -19,6 +48,7 @@ A microservice for handling user authentication, registration, and profile manag
 - PostgreSQL database
 - Mailjet account (for email services)
 - LinkedIn OAuth credentials
+- Git
 
 ## Configuration
 
@@ -87,6 +117,36 @@ The service will be available at `http://localhost:8080`.
 - `PUT /users/profile` - Update user profile
 - `DELETE /users/profile` - Delete user account
 
+### Directory Service
+
+#### Students
+- `GET /api/v1/directory/students` - List all students (with filtering)
+- `GET /api/v1/directory/students/:id` - Get a specific student by ID
+- `POST /api/v1/directory/students` - Create a new student
+- `PUT /api/v1/directory/students/:id` - Update an existing student
+- `DELETE /api/v1/directory/students/:id` - Delete a student
+
+#### Professionals
+- `GET /api/v1/directory/professionals` - List all professionals (with filtering)
+- `GET /api/v1/directory/professionals/:id` - Get a specific professional by ID
+- `POST /api/v1/directory/professionals` - Create a new professional
+- `PUT /api/v1/directory/professionals/:id` - Update a professional
+- `DELETE /api/v1/directory/professionals/:id` - Delete a professional
+
+#### Corporates
+- `GET /api/v1/directory/corporates` - List all corporates (with filtering)
+- `GET /api/v1/directory/corporates/:id` - Get a specific corporate by ID
+- `POST /api/v1/directory/corporates` - Create a new corporate
+- `PUT /api/v1/directory/corporates/:id` - Update a corporate
+- `DELETE /api/v1/directory/corporates/:id` - Delete a corporate
+
+#### Colleges
+- `GET /api/v1/directory/colleges` - List all colleges (with filtering)
+- `GET /api/v1/directory/colleges/:id` - Get a specific college by ID
+- `POST /api/v1/directory/colleges` - Create a new college
+- `PUT /api/v1/directory/colleges/:id` - Update a college
+- `DELETE /api/v1/directory/colleges/:id` - Delete a college
+
 ## Docker Deployment
 
 1. Build the Docker image:
@@ -104,23 +164,40 @@ docker run -d \
 
 ## Architecture
 
-The service follows clean architecture principles with the following structure:
+The system follows clean architecture principles with the following structure:
 
 ```
 .
+├── api/
+│   └── directory-service/
+│       ├── college/
+│       ├── corporate/
+│       ├── professional/
+│       └── student/
 ├── cmd/
-│   └── user-management-service/
-│       └── main.go
+│   ├── directory-service/
+│   │   └── main.go
+│   └── seed/
 ├── internal/
+│   ├── directory-service/
+│   │   ├── domain/
+│   │   ├── repository/
+│   │   └── usecase/
 │   └── user-management-service/
 │       ├── domain/
 │       ├── repository/
 │       └── usecase/
 ├── pkg/
 │   ├── auth/
+│   ├── config/
+│   ├── database/
 │   ├── errors/
 │   ├── logger/
+│   ├── middleware/
+│   ├── pagination/
+│   ├── utils/
 │   └── validation/
+├── migrations/
 └── configs/
 ```
 
@@ -156,10 +233,14 @@ The service uses custom error types for consistent error responses:
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
+3. Commit your changes with descriptive commit messages
 4. Push to the branch
-5. Create a Pull Request
+5. Create a Pull Request with a clear description of changes
 
-## License
+## Related Repositories
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+- [Trikona Frontend](https://github.com/hacKRD0/trikona-frontend)
+
+## Support
+
+For support or feature requests, please open an issue in the [GitHub repository](https://github.com/hacKRD0/trikona-backend-services/issues).

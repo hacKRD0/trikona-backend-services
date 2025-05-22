@@ -8,13 +8,14 @@ import (
 	"github.com/hacKRD0/trikona_go/internal/directory-service/domain"
 	"github.com/hacKRD0/trikona_go/internal/directory-service/usecase"
 	"github.com/hacKRD0/trikona_go/pkg/logger"
+	"github.com/hacKRD0/trikona_go/pkg/utils"
 )
 
 type Handler struct {
 	uc usecase.CollegeUsecase
 }
 
-func NewHandler(uc usecase.CollegeUsecase) *Handler {
+func NewCollegeHandler(uc usecase.CollegeUsecase) *Handler {
 	return &Handler{uc: uc}
 }
 
@@ -24,6 +25,10 @@ func (h *Handler) GetColleges(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
 		return
 	}
+
+	params.Country = utils.SplitStringArray(params.Country)
+	params.States = utils.SplitStringArray(params.States)
+
 	list, total, err := h.uc.FetchColleges(&params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch colleges"})
